@@ -33,7 +33,6 @@ autoinstall:
       #!/bin/bash
       set -e
 
-      MARKER="/opt/bootstrap/.done"
       USB_LABEL="CIDATA"
       MNT="/mnt/cidata"
 
