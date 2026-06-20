@@ -1,0 +1,3 @@
+# instance-id must change for reinstall to work.
+instance-id: machine1-01
+local-hostname: machine1

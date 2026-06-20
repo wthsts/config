@@ -1,0 +1,56 @@
+#cloud-config
+autoinstall:
+  # Current parser version is 1.
+  version: 1
+  
+  refresh-installer:
+    update: false
+
+  apt:
+    preserve_sources_list: true
+
+  identity:
+    hostname: machine1
+    username: jim
+    password: "$6$IlvreOqXZe49hLSF$iEK0ogiBDU6q/tyJxavT/VujMpS8FjyjUeetWVUwqxvP6ovV7ULXhoyHuslof5iSD912N2ThPa1rWhG0ehEiJ0"
+
+  locale: en_US
+  keyboard:
+    layout: us
+  
+  storage:
+    layout:
+      name: direct
+
+  packages:
+    - openssh-server
+
+  late-commands:
+    - |
+      mkdir -p /target/opt/bootstrap
+
+      cat << 'EOF' > /target/opt/bootstrap/copydata.sh
+      #!/bin/bash
+      set -e
+
+      MARKER="/opt/bootstrap/.done"
+      USB_LABEL="CIDATA"
+      MNT="/mnt/cidata"
+
+      DEV=$(blkid -L "$USB_LABEL" || true)
+
+      if [ -z "$DEV" ]; then
+        echo "CIDATA USB not found"
+        exit 1
+      fi
+
+      mkdir -p "$MNT"
+      mount "$DEV" "$MNT"
+
+      mkdir -p /opt/bootstrap
+      cp -r "$MNT/bootstrap/"* /opt/bootstrap/ 2>/dev/null || true
+      chown -R jim /opt/bootstrap
+
+      EOF
+
+      chmod +x /target/opt/bootstrap/copydata.sh
