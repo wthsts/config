@@ -28,7 +28,9 @@ echo "Starting WiFi connection..."
 
 wpa_supplicant -B -i "$IFACE" -c /tmp/wpa.conf
 
-sleep 5
+SLEEP_TIME=10
+echo "sleep $SLEEP_TIME before testing if the network is reachable"
+sleep $SLEEP_TIME
 
 if ! ping -c 1 8.8.8.8 >/dev/null 2>&1; then
   echo "Intenet not reachable"

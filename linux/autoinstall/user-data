@@ -26,30 +26,19 @@ autoinstall:
     - openssh-server
 
   late-commands:
-    - |
-      mkdir -p /target/opt/bootstrap
+    # 1. Disable the service so it does not start automatically
+    - curtin in-target -- systemctl disable systemd-networkd-wait-online.service
+    # 2. Mask the service to prevent any other service from manually triggering it
+    - curtin in-target -- systemctl mask systemd-networkd-wait-online.service
 
-      cat << 'EOF' > /target/opt/bootstrap/copydata.sh
-      #!/bin/bash
-      set -e
-
-      USB_LABEL="CIDATA"
-      MNT="/mnt/cidata"
-
-      DEV=$(blkid -L "$USB_LABEL" || true)
-
-      if [ -z "$DEV" ]; then
-        echo "CIDATA USB not found"
-        exit 1
-      fi
-
-      mkdir -p "$MNT"
-      mount "$DEV" "$MNT"
-
-      mkdir -p /opt/bootstrap
-      cp -r "$MNT/bootstrap/"* /opt/bootstrap/ 2>/dev/null || true
-      chown -R tom /opt/bootstrap
-
-      EOF
-
-      chmod +x /target/opt/bootstrap/copydata.sh
+    # 2. Find and mount the CIDATA partition by label
+    # This creates a temporary, reliable mount point within the installer environment
+    - mkdir -p /tmp/cidata_mount
+    - mount -L CIDATA /tmp/cidata_mount
+    
+    # 3. Now perform the copy using the known /tmp/cidata_mount path
+    - mkdir -p /target/opt/bootstrap
+    - cp -a /tmp/cidata_mount/bootstrap/. /target/opt/bootstrap/
+    
+    # 4. Cleanup
+    - umount /tmp/cidata_mount
