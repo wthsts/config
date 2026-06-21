@@ -12,7 +12,8 @@ autoinstall:
   identity:
     hostname: machine1
     username: tom
-    password: "$6$IlvreOqXZe49hLSF$iEK0ogiBDU6q/tyJxavT/VujMpS8FjyjUeetWVUwqxvP6ovV7ULXhoyHuslof5iSD912N2ThPa1rWhG0ehEiJ0"
+    # Generated with:  openssl passwd -6
+    password: "$6$2CkW4gyqnGvQ7nmX$cad4WNt5Vd7Fd/Ubv458zYQCyadUtxWKG63mzswoijGuKjCY9Zt5bs7j/g9SFmgQaL9Jdtsj/b8YIybxcTPPV0"
 
   locale: en_US
   keyboard:
@@ -35,10 +36,18 @@ autoinstall:
     # This creates a temporary, reliable mount point within the installer environment
     - mkdir -p /tmp/cidata_mount
     - mount -L CIDATA /tmp/cidata_mount
+        
+    # 3. Ensure the user home exists (if the installer hasn't created it yet)
+    - curtin in-target -- mkdir -p /home/tom/bootstrap    
+    # 4. Copy the files
+    - cp -a /tmp/cidata_mount/bootstrap/. /target/home/tom/bootstrap/
     
-    # 3. Now perform the copy using the known /tmp/cidata_mount path
-    - mkdir -p /target/opt/bootstrap
-    - cp -a /tmp/cidata_mount/bootstrap/. /target/opt/bootstrap/
+    # 5. CRITICAL: Fix ownership so the 'tom' user can actually use these files
+    # Replace 'tom' with your actual username
+    - curtin in-target -- chown -R tom:tom /home/tom/bootstrap
     
-    # 4. Cleanup
+    # 46. Set permissions
+    - curtin in-target -- chmod +x /home/tom/bootstrap/*.sh
+
+    # 7. Cleanup
     - umount /tmp/cidata_mount
