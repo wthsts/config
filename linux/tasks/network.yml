@@ -1,0 +1,20 @@
+---
+- name: Remove old network configs and apply VLAN
+  become: yes
+  block:
+    # 1. This deletes existing config files in /etc/netplan/ 
+    # to ensure the guest network config is purged.
+    - name: Clear existing netplan configs
+      shell: rm /etc/netplan/*.yaml
+
+    # 2. Deploy your secure VLAN config
+    - name: Apply new VLAN configuration
+      template:
+        src: netplan.yaml.j2
+        dest: /etc/netplan/01-netcfg.yaml
+        mode: '0600'
+      notify: Apply Network Config
+
+  handlers:
+    - name: Apply Network Config
+      command: netplan apply

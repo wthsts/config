@@ -11,7 +11,7 @@ autoinstall:
 
   identity:
     hostname: machine1
-    username: jim
+    username: tom
     password: "$6$IlvreOqXZe49hLSF$iEK0ogiBDU6q/tyJxavT/VujMpS8FjyjUeetWVUwqxvP6ovV7ULXhoyHuslof5iSD912N2ThPa1rWhG0ehEiJ0"
 
   locale: en_US
@@ -48,7 +48,7 @@ autoinstall:
 
       mkdir -p /opt/bootstrap
       cp -r "$MNT/bootstrap/"* /opt/bootstrap/ 2>/dev/null || true
-      chown -R jim /opt/bootstrap
+      chown -R tom /opt/bootstrap
 
       EOF
 

@@ -1,0 +1,10 @@
+---
+- name: System Provisioning
+  hosts: localhost
+  vars_files:
+    - group_vars/all/vault.yml
+  
+  tasks:
+    # We will break the tasks into logical blocks here
+    - import_tasks: tasks/users.yml
+    - import_tasks: tasks/ssh.yml

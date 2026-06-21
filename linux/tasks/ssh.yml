@@ -1,0 +1,26 @@
+---
+- name: Install OpenSSH Server
+  become: yes
+  apt:
+    name: openssh-server
+    state: present
+
+- name: Add SSH keys
+  become: yes
+  authorized_key:
+    user: "{{ item.user }}"
+    key: "{{ item.key }}"
+  loop:
+    - { user: "{{ vault_user_a }}", key: "{{ vault_pub_key_a }}" }
+    - { user: "{{ vault_user_b }}", key: "{{ vault_pub_key_b }}" }
+
+- name: Harden sshd_config
+  become: yes
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^AllowUsers'
+    line: 'AllowUsers {{ vault_user_a }} {{ vault_user_b }}'
+  notify: Restart SSH
+
+- name: Define handler for SSH
+  meta: flush_handlers

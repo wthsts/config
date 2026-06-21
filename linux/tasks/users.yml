@@ -1,0 +1,14 @@
+---
+- name: Secure the user a
+  become: yes
+  ansible.builtin.user:
+    name: "{{ vault_user_a }}"
+    password: "{{ vault_password_a | password_hash('sha512') }}"
+
+- name: Create the user b
+  become: yes
+  ansible.builtin.user:
+    name: "{{ vault_user_b }}"
+    password: "{{ vault_password_b | password_hash('sha512') }}"
+    shell: /bin/bash
+    create_home: yes
