@@ -1,1 +1,1 @@
-linux/group_vars/all/vault.yml
+linux/ansible/group_vars/all/vault.yml
