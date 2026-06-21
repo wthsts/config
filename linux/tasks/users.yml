@@ -12,3 +12,9 @@
     password: "{{ vault_password_b | password_hash('sha512') }}"
     shell: /bin/bash
     create_home: yes
+    groups:
+      - docker       # Required to run containerized apps
+      - render       # Required for GPU-accelerated graphics/compute
+      - plugdev      # Required for hardware/USB debugging
+      - podman       # Required to run containerized apps
+    append: yes

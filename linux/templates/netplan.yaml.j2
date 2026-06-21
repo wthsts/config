@@ -4,15 +4,12 @@ network:
   ethernets:
     {{ interface_name }}:
       dhcp4: no
-      optional: true  # Prevents boot delay if cable is unplugged
-  vlans:
-    vlan{{ vlan_id }}:
-      id: {{ vlan_id }}
-      link: {{ interface_name }}
-      addresses:
-        - {{ vlan_ip_address }}/24
-      routes:
-        - to: default
-          via: {{ gateway_ip }}
-      nameservers:
-        addresses: [8.8.8.8, 8.8.4.4]
+      optional: true  # <--- Avoid log retries when not present.
+
+  wifis:
+    wlp2s0:  # Adjust to your specific interface name (use 'ip -o link show' to verify)
+      optional: true  # Prevents boot delay if connection fails
+      dhcp4: yes      # Most Wi-Fi routers will handle the IP assignment
+      access-points:
+        "{{ wifi_ssid }}":
+          password: "{{ wifi_password }}"
