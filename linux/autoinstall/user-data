@@ -38,16 +38,16 @@ autoinstall:
     - mount -L CIDATA /tmp/cidata_mount
         
     # 3. Ensure the user home exists (if the installer hasn't created it yet)
-    - curtin in-target -- mkdir -p /home/tom/bootstrap    
+    - curtin in-target -- mkdir -p /target/home/tom/bootstrap    
     # 4. Copy the files
     - cp -a /tmp/cidata_mount/bootstrap/. /target/home/tom/bootstrap/
     
     # 5. CRITICAL: Fix ownership so the 'tom' user can actually use these files
-    # Replace 'tom' with your actual username
-    - curtin in-target -- chown -R tom:tom /home/tom/bootstrap
+    # Use 1000 instead of tom.  1000 is id of first user (tom)
+    - chown -R 1000:1000 /target/home/tom/bootstrap
     
     # 46. Set permissions
-    - curtin in-target -- chmod +x /home/tom/bootstrap/*.sh
+    - chmod +x /target/home/tom/bootstrap/*.sh
 
     # 7. Cleanup
     - umount /tmp/cidata_mount
