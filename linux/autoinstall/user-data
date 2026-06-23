@@ -10,7 +10,7 @@ autoinstall:
     preserve_sources_list: true
 
   identity:
-    hostname: machine1
+    hostname: m2
     username: tom
     # Generated with:  openssl passwd -6
     password: "$6$2CkW4gyqnGvQ7nmX$cad4WNt5Vd7Fd/Ubv458zYQCyadUtxWKG63mzswoijGuKjCY9Zt5bs7j/g9SFmgQaL9Jdtsj/b8YIybxcTPPV0"
@@ -25,29 +25,48 @@ autoinstall:
 
   packages:
     - openssh-server
+    - wpasupplicant
 
   late-commands:
-    # 1. Disable the service so it does not start automatically
-    - curtin in-target -- systemctl disable systemd-networkd-wait-online.service
-    # 2. Mask the service to prevent any other service from manually triggering it
-    - curtin in-target -- systemctl mask systemd-networkd-wait-online.service
+    - |
+      # Create initial netplan file and disiable ethernet links.
+      # Uses a en* match which currently matches all ethernet link retruned from
+      # Wifi set up from network.sh after first reboot.
+      # "ip link" command
+      rm /target/etc/netplan/0*.yaml
+      tee /target/etc/netplan/01-config.yaml <<EOF
+      network:
+        version: 2
+        renderer: networkd
+        ethernets:
+          all-en-interfaces:
+            match:
+              name: "en*"
+            dhcp4: true
+            optional: true
+      EOF
 
-    # 2. Find and mount the CIDATA partition by label
-    # This creates a temporary, reliable mount point within the installer environment
-    - mkdir -p /tmp/cidata_mount
-    - mount -L CIDATA /tmp/cidata_mount
+        # Variables
+        MOUNT_POINT="/tmp/cidata_mount"
+        LABEL="CIDATA"
+        CIDATA_PATH=$(findmnt -n -S LABEL=$LABEL -o TARGET | head -n 1)
+        MOUNTED_BY_US=false
         
-    # 3. Ensure the user home exists (if the installer hasn't created it yet)
-    - curtin in-target -- mkdir -p /target/home/tom/bootstrap    
-    # 4. Copy the files
-    - cp -a /tmp/cidata_mount/bootstrap/. /target/home/tom/bootstrap/
-    
-    # 5. CRITICAL: Fix ownership so the 'tom' user can actually use these files
-    # Use 1000 instead of tom.  1000 is id of first user (tom)
-    - chown -R 1000:1000 /target/home/tom/bootstrap
-    
-    # 46. Set permissions
-    - chmod +x /target/home/tom/bootstrap/*.sh
-
-    # 7. Cleanup
-    - umount /tmp/cidata_mount
+        if [ -z "$CIDATA_PATH" ]; then
+            mkdir -p $MOUNT_POINT
+            mount -L $LABEL $MOUNT_POINT
+            MOUNTED_BY_US=true
+            CIDATA_PATH=$MOUNT_POINT
+        fi
+        
+        # Operations (executed inside the same block)
+        mkdir -p /target/home/tom/bootstrap
+        cp -a $CIDATA_PATH/bootstrap/. /target/home/tom/bootstrap/
+        chown -R 1000:1000 /target/home/tom/bootstrap
+        chmod +x /target/home/tom/bootstrap/*.sh
+        
+        # Cleanup (still inside the block)
+        if [ "$MOUNTED_BY_US" = true ]; then
+            umount $MOUNT_POINT
+            rmdir $MOUNT_POINT
+        fi

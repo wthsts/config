@@ -1,49 +1,26 @@
-echo "Detecting WiFi interface..."
-
-IFACE=$(ip link | awk -F: '$0 ~ "wl" {print $2; exit}' | xargs)
-
-if [ -z "$IFACE" ]; then
-  echo "No WiFi interface found"
-  exit 1
+if [[ $EUID -eq 0 ]]; then
+   echo "This script must be NOT run as root (or with sudo)" 
+   exit 1
 fi
 
-echo "Using interface: $IFACE"
+sudo apt update
+sudo apt install -y ansible
 
-read -rp "SSID: " SSID
-read -rp "WiFi Password: " PASS
-echo
+if [[ -f ~/bootstrap/authorized_keys ]]; then
+    mkdir -p ~/.ssh
 
-cat > /tmp/wpa.conf <<EOF
-ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
-update_config=1
-country=US
-
-network={
-    ssid="$SSID"
-    psk="$PASS"
-}
-EOF
-
-echo "Starting WiFi connection..."
-
-wpa_supplicant -B -i "$IFACE" -c /tmp/wpa.conf
-
-SLEEP_TIME=10
-echo "sleep $SLEEP_TIME before testing if the network is reachable"
-sleep $SLEEP_TIME
-
-if ! ping -c 1 8.8.8.8 >/dev/null 2>&1; then
-  echo "Intenet not reachable"
-  exit 1
+    if ! mv ~/bootstrap/authorized_keys ~/.ssh/authorized_keys ; then
+      echo "ssh keys could not be moved to " ~/.ssh/authorized_keys
+      exit 1
+    fi
+else
+    echo "ssh already initialized"
 fi
 
-if ! ping -c 1 archive.ubuntu.com >/dev/null 2>&1; then
-  echo "DNS not working"
-  exit 1
-fi
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/*
+chown $USER:$USER ~/.ssh
+chown $USER:$USER ~/.ssh/*
 
-apt update
-apt install -y ansible
-
-#cd /opt/bootstrap/ansible
+#cd ~/bootstrap/ansible
 #ansible-playbook site.yml -c local
