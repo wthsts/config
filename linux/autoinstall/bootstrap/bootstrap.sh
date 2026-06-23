@@ -1,5 +1,5 @@
 if [[ $EUID -eq 0 ]]; then
-   echo "This script must be NOT run as root (or with sudo)" 
+   echo "This script must be NOT run as root (or with sudo)"
    exit 1
 fi
 
