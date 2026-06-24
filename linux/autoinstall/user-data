@@ -23,6 +23,8 @@ autoinstall:
     layout:
       name: direct
 
+  # minimum packages I needed to get ssh server and wifi running
+  # in ~/bootstrap/network.sh
   packages:
     - openssh-server
     - wpasupplicant
@@ -33,6 +35,11 @@ autoinstall:
       # Uses a en* match which currently matches all ethernet link retruned from
       # Wifi set up from network.sh after first reboot.
       # "ip link" command
+      # To avoid 2 mins of connection retries to ethernet port I found I had to do
+      # two things 1) Remove the installer generated netplay yaml file.
+      # 2) Add a minimal netplan yaml file that specifies he ethernet port connection
+      # as "optional: true".  I tried just removing all yaml files, but that was not enough
+      # to prevent the 2 minute retry at the first reboot.
       rm /target/etc/netplan/0*.yaml
       tee /target/etc/netplan/01-config.yaml <<EOF
       network:
