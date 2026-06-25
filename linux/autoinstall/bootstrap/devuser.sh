@@ -50,6 +50,9 @@ sudo apt-get install -y podman
 echo "installing git needed for dev"
 sudo apt install git
 
+git config --global user.name "jeff"
+git config --global user.email "jeffshagbaby@gmail.com"
+
 DEV_UID=$(id -u "$USERNAME")
 
 # This tells systemd to keep the user's manager running even when not logged in
