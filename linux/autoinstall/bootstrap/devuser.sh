@@ -47,6 +47,9 @@ echo "Updating packages and installing Podman..."
 sudo apt-get update
 sudo apt-get install -y podman
 
+echo "installing git needed for dev"
+sudo apt install git
+
 DEV_UID=$(id -u "$USERNAME")
 
 # This tells systemd to keep the user's manager running even when not logged in
@@ -60,3 +63,8 @@ sudo loginctl enable-linger "$USERNAME"
 # Using --machine=<user>@.host handles the environment and bus connection automatically
 sudo systemctl --user --machine="$USERNAME"@.host enable podman.socket
 sudo systemctl --user --machine="$USERNAME"@.host start podman.socket
+
+
+# Create a symbolic link so the system thinks 'docker' exists
+# (Only if you don't have actual Docker installed)
+sudo ln -sf /usr/bin/podman /usr/bin/docker
