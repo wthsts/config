@@ -80,7 +80,7 @@ sudo udevadm trigger
 sudo usermod -a -G dialout "$DEVUSER"
 
 # This forces the device to be accessible by anyone in the 'dialout' group
-# echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", MODE="0666", GROUP="dialout"' | sudo tee /etc/udev/rules.d/99-platformio-udev.rules
+#echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", MODE="0666", GROUP="dialout"' | sudo tee /etc/udev/rules.d/99-platformio-udev.rules
 # This forces the device mode to 0666, allowing anyone in the dialout group read/write access
 echo 'KERNEL=="ttyUSB*", MODE="0666", GROUP="dialout"' | sudo tee /etc/udev/rules.d/99-platformio-udev.rules
 
