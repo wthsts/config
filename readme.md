@@ -22,3 +22,7 @@ If this bootstrap process is successful, the end result of all this is:
 **     Add dev user for software development with restricted access.
 **     
 
+Podmand and DevContainer notes
+
+I had trouble getting Microsoft ContainerTools extension tools working so I uninstalled them
+and just work with the DevContainer extension.
