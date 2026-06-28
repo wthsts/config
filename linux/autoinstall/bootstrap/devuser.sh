@@ -43,6 +43,29 @@ fi
 # Enforce permissions (always safe to run)
 sudo chown -R "$DEVUSER:$DEVUSER" "$SSH_DIR"
 
+DEVHOME="/home/$DEVUSER"
+TARGET_FILE="$DEVHOME/.profile"
+
+# Ensure the directory exists
+sudo mkdir -p "$DEVHOME/bin"
+
+# Add the path modification to .profile if it's not already there
+if ! sudo grep -q "$DEVHOME/bin" "$TARGET_FILE"; then
+  cat << 'EOF' | sudo tee -a "$TARGET_FILE" > /dev/null
+
+# Added by bootstrap script
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$PATH"
+fi
+export PATH
+EOF
+fi
+
+# Perhaps this should be changed to a git project 
+# located at ~/projects/tools/bin
+#sudo cp devbin/* "$DEVHOME/bin"
+#sudo chmod +x "$DEVHOME/bin"/*
+
 echo "installing git needed for dev"
 sudo apt install git
 
