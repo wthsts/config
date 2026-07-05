@@ -36,3 +36,10 @@ sudo systemctl restart ssh
 
 #cd ~/bootstrap/ansible
 #ansible-playbook site.yml -c local
+
+# Install nftables and enable it to restict port access to the system.
+# can view config afterwards with
+#   sudo nft list ruleset
+install -m 644 nftables.conf /etc/nftables.conf
+systemctl enable --now nftables
+systemctl reload nftables
