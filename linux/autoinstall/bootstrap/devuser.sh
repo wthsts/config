@@ -72,8 +72,6 @@ sudo apt install git
 git config --global user.name "jeff"
 git config --global user.email "jeffshagbaby@gmail.com"
 
-DEV_UID=$(id -u "$DEVUSER")
-
 echo "Updating packages and installing Podman..."
 sudo apt-get update
 sudo apt-get install -y podman
@@ -89,24 +87,3 @@ sudo systemctl --user --machine="$DEVUSER"@.host start podman.socket
 # Create a symbolic link so the system thinks 'docker' exists
 # (Only if you don't have actual Docker installed)
 sudo ln -sf /usr/bin/podman /usr/bin/docker
-
-# This is for platformio access to USB ports so code can be uploaded.
-# Install the rules file (System-wide)
-curl -fsSL https://raw.githubusercontent.com/platformio/platformio-core/master/scripts/99-platformio-udev.rules | sudo tee /etc/udev/rules.d/99-platformio-udev.rules
-
-# Apply the rules so the kernel picks them up immediately
-sudo udevadm control --reload-rules
-sudo udevadm trigger
-
-# 3. Add the DEVUSER to the dialout group (The specific "Gatekeeper")
-# Replace 'your_dev_username' with the actual account name of your dev user
-sudo usermod -a -G dialout "$DEVUSER"
-
-# This forces the device to be accessible by anyone in the 'dialout' group
-#echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", MODE="0666", GROUP="dialout"' | sudo tee /etc/udev/rules.d/99-platformio-udev.rules
-# This forces the device mode to 0666, allowing anyone in the dialout group read/write access
-echo 'KERNEL=="ttyUSB*", MODE="0666", GROUP="dialout"' | sudo tee /etc/udev/rules.d/99-platformio-udev.rules
-
-# Reload
-sudo udevadm control --reload-rules
-sudo udevadm trigger
